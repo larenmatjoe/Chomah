@@ -1,6 +1,6 @@
 # XDP Firewall — IP Blocklist at the Driver Level
 
-A **high-performance** XDP (eXpress Data Path) BPF program that drops packets
+A high-performance XDP (eXpress Data Path) BPF program that drops packets
 from blocked IP addresses at the NIC driver level — before the kernel network
 stack, before connection tracking, before any socket overhead. JIT-compiled to
 native instructions with O(1) hash-table lookups, it can drop millions of
