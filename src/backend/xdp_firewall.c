@@ -27,6 +27,11 @@ int xdp_firewall_filter(struct xdp_md *ctx) {
   __u8 *is_blocked = bpf_map_lookup_elem(&blocklist_map, &src_ip);
 
   if (is_blocked && *is_blocked == 1) {
+    bpf_printk("Dropping packet from blocked IP: %u.%u.%u.%u\n",
+               (src_ip >> 24) & 0xFF,
+               (src_ip >> 16) & 0xFF,
+               (src_ip >> 8) & 0xFF,
+               src_ip & 0xFF);
     return XDP_DROP;
   }
   return XDP_PASS;
