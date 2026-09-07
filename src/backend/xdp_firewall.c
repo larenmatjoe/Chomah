@@ -3,6 +3,10 @@
 #include <linux/if_ether.h>
 #include <linux/ip.h>
 #include <linux/in.h>
+#include <linux/inet.h>
+
+// https://www.datadoghq.com/blog/xdp-intro/
+// https://www.tigera.io/learn/guides/ebpf/ebpf-xdp/
 
 struct {
   __uint(type, BPF_MAP_TYPE_HASH);
@@ -15,10 +19,12 @@ SEC("xdp")
 int xdp_firewall_filter(struct xdp_md *ctx) {
   void *data = (void *)(long)ctx->data;
   void *data_end = (void *)(long)ctx->data_end;
-
+  __u16 h_proto;
   struct ethhdr *eth = data;
   if ((void *)(eth + 1) > data_end) return XDP_PASS;
-  if (eth->h_proto != __constant_htons(ETH_P_IP)) return  XDP_PASS;
+  h_proto = eth->h_proto;
+  if (h_proto == htons(ETH_P_IPV6)) return XDP_DROP;
+  if (h_proto != __constant_htons(ETH_P_IP)) return  XDP_PASS;
 
   struct iphdr *iph = (void *)(eth + 1);
   if ((void *)(iph + 1) > data_end) return XDP_PASS;

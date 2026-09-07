@@ -38,6 +38,9 @@ apk add clang llvm libbpf-dev linux-headers bpftool
 
 # Arch
 sudo pacman -S clang llvm bpftool linux-headers
+
+# Fedora
+sudo dnf install clang llvm bpftool kernel-devel-$(uname -r)
 ```
 
 ---
@@ -48,6 +51,10 @@ sudo pacman -S clang llvm bpftool linux-headers
 
 ```bash
 clang -O2 -g -Wall -target bpf -c xdp_firewall.c -o xdp_firewall.o
+
+# Fedora
+clang -O2 -g -Wall -target bpf -I/usr/src/kernels/$(uname -r)/tools/bpf/resolve_btfids/libbpf/include \
+-c xdp_firewall.c -o xdp_firewall.o
 ```
 
 ### 2. Mount BPF filesystem (if not already mounted)
