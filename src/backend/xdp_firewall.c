@@ -3,7 +3,7 @@
 #include <linux/if_ether.h>
 #include <linux/ip.h>
 #include <linux/in.h>
-#include <linux/inet.h>
+#include <bpf/bpf_endian.h>
 
 // https://www.datadoghq.com/blog/xdp-intro/
 // https://www.tigera.io/learn/guides/ebpf/ebpf-xdp/
@@ -23,8 +23,8 @@ int xdp_firewall_filter(struct xdp_md *ctx) {
   struct ethhdr *eth = data;
   if ((void *)(eth + 1) > data_end) return XDP_PASS;
   h_proto = eth->h_proto;
-  if (h_proto == htons(ETH_P_IPV6)) return XDP_DROP;
-  if (h_proto != __constant_htons(ETH_P_IP)) return  XDP_PASS;
+  if (h_proto == bpf_htons(ETH_P_IPV6)) return XDP_DROP;
+  if (h_proto != bpf_htons(ETH_P_IP)) return  XDP_PASS;
 
   struct iphdr *iph = (void *)(eth + 1);
   if ((void *)(iph + 1) > data_end) return XDP_PASS;
