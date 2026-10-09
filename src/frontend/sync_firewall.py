@@ -10,6 +10,7 @@ def sync_firewall():
         print("Firewall map not found")
         return
     print("Reading blocklist")
+    wanted = {}
     with open(IP_FILE_PATH, "r") as file:
         for line in file:
             ip_str = line.strip()
@@ -19,12 +20,16 @@ def sync_firewall():
                 ip_obj = ipaddress.IPv4Address(ip_str)
                 raw_bytes = ip_obj.packed
                 hex_bytes = " ".join(f"0x{b:02x}" for b in reversed(raw_bytes))
-                subprocess.run(["bpftool", "map", "update", "pinned", BPF_MAP_PATH,
-                                "key", *hex_bytes.split(), "value", "0x01"], check=True)
-                print(f" Blocked {ip_str}")
+                wanted[hex_bytes] = ip_str
 
             except ValueError:
                 print(f"Error at {line}")
+    # One bpftool process applies every update.
+    batch = [f"map update pinned {BPF_MAP_PATH} key {k} value 0x01" for k in wanted]
+    subprocess.run(["bpftool", "batch", "file", "-"],
+                   input="\n".join(batch) + "\n", check=True, text=True)
+    for ip_str in wanted.values():
+        print(f" Blocked {ip_str}")
 if __name__ == "__main__":
     sync_firewall()
     print("Kernel firewall maps updated successfully")
