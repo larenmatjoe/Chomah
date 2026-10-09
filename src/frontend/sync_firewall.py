@@ -1,8 +1,9 @@
 import ipaddress
 import os
 import subprocess
+from pathlib import Path
 BPF_MAP_PATH = "/sys/fs/bpf/blocklist_map"
-IP_FILE_PATH = "blocked_ips.txt"
+IP_FILE_PATH = Path(__file__).resolve().parents[2] / "blocked_ips.txt"
 
 def sync_firewall():
     if not os.path.exists(BPF_MAP_PATH):
