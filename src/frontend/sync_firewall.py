@@ -19,8 +19,8 @@ def sync_firewall():
                 ip_obj = ipaddress.IPv4Address(ip_str)
                 raw_bytes = ip_obj.packed
                 hex_bytes = " ".join(f"0x{b:02x}" for b in reversed(raw_bytes))
-                cmd = f"sudo bpftool map update pinned {BPF_MAP_PATH} key {hex_bytes} value 0x01"
-                subprocess.run(cmd, shell=True, check=True)
+                subprocess.run(["bpftool", "map", "update", "pinned", BPF_MAP_PATH,
+                                "key", *hex_bytes.split(), "value", "0x01"], check=True)
                 print(f" Blocked {ip_str}")
 
             except ValueError:
